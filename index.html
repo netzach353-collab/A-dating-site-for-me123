@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoveLink — פרופילים</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: #ededed; font-family: 'Heebo', sans-serif; min-height: 100vh; }
+
+    /* TOP BAR */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      height: 64px; background: rgba(12,12,12,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+    }
+    .topbar-logo { display: flex; align-items: center; gap: 8px; }
+    .topbar-logo span {
+      font-size: 1.15rem; font-weight: 800;
+      background: linear-gradient(to right, #e8457a, #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .icon-btn {
+      background: none; border: none; cursor: pointer;
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #ededed; transition: background 0.2s;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.08); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    /* MAIN */
+    main { padding-top: 80px; padding-bottom: 32px; max-width: 520px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+
+    /* SEARCH */
+    .search-wrap { position: sticky; top: 64px; z-index: 30; padding: 12px 0 8px; background: rgba(10,10,10,0.85); backdrop-filter: blur(16px); }
+    .search-box { position: relative; }
+    .search-box input {
+      width: 100%; height: 44px; border-radius: 12px;
+      background: rgba(255,255,255,0.06); border: none;
+      color: #ededed; font-family: 'Heebo', sans-serif; font-size: 0.9rem;
+      padding: 0 40px 0 16px; outline: none;
+      transition: box-shadow 0.2s;
+    }
+    .search-box input:focus { box-shadow: 0 0 0 2px rgba(232,69,122,0.3); }
+    .search-box input::placeholder { color: #666; }
+    .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #666; }
+    .search-icon svg { width: 16px; height: 16px; }
+    .results-count { font-size: 0.75rem; color: #555; margin-top: 6px; }
+
+    /* PROFILE LIST */
+    .profile-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+    .profile-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-radius: 16px;
+      background: #111; border: 1px solid transparent;
+      cursor: pointer; transition: all 0.2s; direction: ltr;
+    }
+    .profile-card:hover { background: #1a1a1a; border-color: rgba(255,255,255,0.08); }
+
+    .avatar-wrap { position: relative; flex-shrink: 0; }
+    .avatar-wrap img {
+      width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(232,69,122,0.25);
+    }
+    .online-dot {
+      position: absolute; bottom: 1px; right: 1px;
+      width: 13px; height: 13px; background: #22c55e;
+      border-radius: 50%; border: 2px solid #111;
+    }
+
+    .profile-info { flex: 1; min-width: 0; direction: rtl; }
+    .profile-name-row { display: flex; align-items: center; gap: 8px; }
+    .profile-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-age { font-size: 0.75rem; color: #777; }
+    .profile-meta { display: flex; align-items: center; gap: 12px; margin-top: 3px; }
+    .meta-item { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #666; }
+    .meta-item svg { width: 12px; height: 12px; }
+    .goal-badge {
+      display: inline-block; margin-top: 5px;
+      font-size: 0.65rem; padding: 2px 8px; border-radius: 999px;
+      background: rgba(232,69,122,0.12); color: #e8457a; font-weight: 500;
+    }
+
+    .like-btn {
+      flex-shrink: 0; background: none; border: none; cursor: pointer;
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(232,69,122,0.55); transition: all 0.2s;
+    }
+    .like-btn:hover { background: rgba(232,69,122,0.1); color: #e8457a; }
+    .like-btn svg { width: 20px; height: 20px; }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100;
+    }
+    .sidebar-overlay.open { display: block; }
+    .sidebar {
+      position: fixed; top: 0; right: -288px; bottom: 0; width: 288px;
+      background: #0d0d0d; z-index: 101; display: flex; flex-direction: column;
+      border-left: 1px solid rgba(255,255,255,0.07);
+      transition: right 0.3s cubic-bezier(.25,.46,.45,.94);
+    }
+    .sidebar.open { right: 0; }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; height: 64px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .sidebar-nav { flex: 1; padding: 12px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; margin-bottom: 10px; border-radius: 12px; text-decoration: none;
+      color: #888; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+      cursor: pointer; border: none; background: none; width: 100%; font-family: 'Heebo', sans-serif;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #ededed; }
+    .nav-item.active { background: rgba(232,69,122,0.1); color: #e8457a; }
+    .nav-item svg { width: 20px; height: 20px; }
+    .sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 12px; width: 100%;
+      background: none; border: none; cursor: pointer; color: #ef4444;
+      font-family: 'Heebo', sans-serif; font-size: 0.9rem; transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.08); }
+    .logout-btn svg { width: 20px; height: 20px; }
+       body::-webkit-scrollbar { display: none; }
+
+.top-user-area{
+  width:60px;
+  display:flex;
+  justify-content:center;
+}
+
+.top-user-link{
+  text-decoration:none;
+  color:#ededed;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+
+.top-user-avatar,
+.top-user-avatar-fallback{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+}
+
+.top-user-avatar{
+  object-fit:cover;
+  border:1px solid rgba(232,69,122,.35);
+}
+
+.top-user-avatar-fallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.08);
+  font-size:14px;
+}
+
+.top-user-name{
+  font-size:10px !important;
+  line-height:1.3;
+  color:#d8d8d8;
+  text-align:center;
+
+  max-width: 90px;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:unset;
+
+}
+
+@media (max-width: 480px){
+
+  .topbar{
+    padding:0 10px;
+  }
+
+  .top-user-area{
+    width:auto;
+    max-width:110px;
+  }
+
+  .top-user-link{
+    gap:4px;
+  }
+
+  .top-user-name{
+    font-size:11px;
+    max-width:100px;
+  }
+
+  .topbar-logo span{
+    font-size:1rem;
+  }
+
+  .w-for-btn1 {
+width: 80% !important;
+  }  
+
+  .icon-btn{
+    width:25px;
+    height:25px;
+  }
+}
+
+.topbar-login {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(to left, #e8457a, #a855f7);
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(232,69,122,0.35);
+  transition: opacity 0.2s;
+}
+.topbar-login:hover { opacity: 0.85; }
+.topbar-login svg { width: 25px; height: 25px; }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <button class="icon-btn" onclick="toggleSidebar()">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+
+  <div id="sidebarUserArea" class="top-user-area"></div>
+
+  <div class="topbar-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="#e8457a"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <span>LoveLink</span>
+  </div>
+  <button class="icon-btn">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+  </button>
+</header>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span style="font-size:1.1rem;font-weight:800;background:linear-gradient(to right,#e8457a,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">LoveLink</span>
+    <button class="icon-btn" onclick="toggleSidebar()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <a href="profiles.html" class="nav-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+      דף ראשי / פרופילים
+    </a>
+    <a href="feed.html" class="nav-item">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      שמו לי לב
+    </a>
+    <a href="my-profile.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      הפרופיל שלי
+    </a>
+      <a href="profile-view.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      איך אני נראה
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="openLogoutBanner()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      התנתק
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
+      <input type="text" placeholder="חיפוש פרופיל..." id="searchInput" oninput="filterProfiles()" />
+    </div>
+    <p class="results-count" id="countLabel">6 פרופילים פעילים</p>
+  </div>
+
+  <div class="profile-list" id="profileList"></div>
+</main>
+
+
+<div id="logoutBanner" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:340px;background:#111;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;text-align:center;">
+    <h3 style="margin-bottom:8px;">להתנתק?</h3>
+    <p style="color:#888;font-size:.9rem;margin-bottom:20px;">האם אתה בטוח שברצונך לצאת מהחשבון?</p>
+
+    <button onclick="logoutUser()" style="width:100%;height:46px;border:none;border-radius:14px;background:#ef4444;color:white;font-family:Heebo;font-weight:700;cursor:pointer;">
+      כן, להתנתק
+    </button>
+
+    <button onclick="closeLogoutBanner()" style="width:100%;height:42px;margin-top:10px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:transparent;color:#aaa;font-family:Heebo;cursor:pointer;">
+      ביטול
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://xhqbruvpprevgmvysezh.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_vBbdxciJj8gdYvR1Zmiclg_G8GTFdnT";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+let allProfiles = [];
+let currentUser = null;
+
+async function loadProfiles() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+currentUser = user || null;
+
+  let query = supabaseClient
+  .from("profiles")
+  .select("*")
+  .eq("profile_completed", true)
+  .order("created_at", { ascending: false });
+
+if (currentUser) {
+  query = query.neq("id", currentUser.id);
+}
+
+const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  allProfiles = data || [];
+  renderProfiles(allProfiles);
+}
+
+function renderProfiles(profiles) {
+  const list = document.getElementById("profileList");
+
+  if (!profiles.length) {
+    list.innerHTML = `<p style="color:#777;text-align:center;margin-top:24px;">אין עדיין פרופילים להצגה</p>`;
+    document.getElementById("countLabel").textContent = "0 פרופילים פעילים";
+    return;
+  }
+
+  list.innerHTML = profiles.map(profile => {
+    const visible = profile.visible_fields || {};
+
+    const showAge = visible.age !== false;
+    const showCity = visible.city !== false;
+    const showOccupation = visible.occupation !== false;
+    const showGoal = visible.goal !== false;
+
+    const avatar = profile.avatar_url || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.full_name || "User");
+
+    return `
+      <div class="profile-card"
+           data-id="${profile.id}"
+           data-name="${profile.full_name || ""}"
+           data-city="${profile.city || ""}"
+           onclick="openProfile('${profile.id}')">
+
+        <button class="like-btn" onclick="event.stopPropagation(); toggleLike(this)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </button>
+
+        <div class="profile-info">
+          <div class="profile-name-row">
+            <span class="profile-name">${profile.full_name || "משתמש/ת"}</span>
+            ${showAge && profile.age ? `<span class="profile-age">${profile.age}</span>` : ""}
+          </div>
+
+          <div class="profile-meta">
+            ${showCity && profile.city ? `
+              <span class="meta-item">📍 ${profile.city}</span>
+            ` : ""}
+
+            ${showOccupation && profile.occupation ? `
+              <span class="meta-item">💼 ${profile.occupation}</span>
+            ` : ""}
+          </div>
+
+          ${showGoal && profile.goal ? `<span class="goal-badge">${profile.goal}</span>` : ""}
+        </div>
+
+        <div class="avatar-wrap">
+          <img src="${avatar}" alt="${profile.full_name || ""}" />
+          <div class="online-dot"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("countLabel").textContent =
+    profiles.length + " פרופילים פעילים";
+}
+
+function filterProfiles() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  const filtered = allProfiles.filter(profile => {
+    const name = (profile.full_name || "").toLowerCase();
+    const city = (profile.city || "").toLowerCase();
+
+    return name.includes(q) || city.includes(q);
+  });
+
+  renderProfiles(filtered);
+}
+
+function openProfile(id) {
+  window.location.href = "profile-view.html?id=" + encodeURIComponent(id);
+}
+
+function toggleLike(btn) {
+  const svg = btn.querySelector("svg");
+  const active = btn.dataset.liked === "1";
+
+  btn.dataset.liked = active ? "0" : "1";
+  svg.setAttribute("fill", active ? "none" : "#e8457a");
+  btn.style.color = active ? "rgba(232,69,122,0.55)" : "#e8457a";
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
+}
+
+async function loadSidebarUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    renderGuestSidebar();
+    return;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  renderLoggedInSidebar(profile, user);
+}
+
+function getDisplayName(profile, user) {
+  if (profile?.full_name?.trim()) {
+    return profile.full_name.trim();
+  }
+
+  if (user?.user_metadata?.full_name) {
+    return user.user_metadata.full_name;
+  }
+
+  if (user?.user_metadata?.name) {
+    return user.user_metadata.name;
+  }
+
+  if (user?.email) {
+    return user.email.split("@")[0];
+  }
+
+  return "הפרופיל שלי";
+}
+
+function renderLoggedInSidebar(profile, user) {
+  const name = getDisplayName(profile, user);
+
+  document.getElementById("sidebarUserArea").innerHTML = `
+    <a class="top-user-link" onclick="openLogoutBanner()">
+
+      ${
+        profile?.avatar_url
+          ? `<img src="${profile.avatar_url}" class="top-user-avatar" alt="${name}">`
+          : `<div class="top-user-avatar-fallback">👤</div>`
+      }
+      <div class="top-user-name">${name}</div>
+
+    </a>
+  `;
+}
+
+function renderGuestSidebar() {
+  document.getElementById("sidebarUserArea").innerHTML = `
+    <a href="register.html" class="w-for-btn1" style="display:flex;align-items:center;gap:6px;padding:2px 14px;border-radius:999px;background:linear-gradient(to left,#e8457a,#a855f7);color:#fff;font-family:'Heebo',sans-serif;font-size:0.8rem;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(232,69,122,0.35);transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <svg font-size: 10px !important; width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+      <div class="top-user-name">כניסה / הרשמה</div>
+    </a>
+  `;
+}
+
+function openLogoutBanner() {
+  document.getElementById("logoutBanner").style.display = "flex";
+}
+
+function closeLogoutBanner() {
+  document.getElementById("logoutBanner").style.display = "none";
+}
+
+async function logoutUser() {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  window.location.href = "index.html";
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadProfiles();
+  await loadSidebarUser();
+});
+</script>
+</body>
+</html>
