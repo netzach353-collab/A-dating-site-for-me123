@@ -728,14 +728,14 @@ function slideTo(idx) {
     btn.classList.toggle('sel');
   }
 
-  /* ─── GOOGLE ─── */
+ 
+/* ─── GOOGLE ─── */
 async function handleGoogle() {
-  sessionStorage.setItem('google_signup_started', '1');
-
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/register.html',
+      redirectTo:
+        'https://netzach353-collab.github.io/A-dating-site-for-me123/register.html',
       queryParams: {
         prompt: 'select_account'
       }
