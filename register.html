@@ -185,21 +185,22 @@
     .int-btn.sel { background: rgba(232,69,122,0.15); color: #e8457a; border-color: rgba(232,69,122,0.4); }
 
     /* AVATAR UPLOAD (step 3) */
-    .avatar-upload-area {
-      width: 100px; height: 100px; border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      border: 2px dashed rgba(255,255,255,0.15);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; margin: 0 auto 20px; transition: all 0.2s; position: relative; overflow: hidden;
-    }
+  
     .avatar-upload-area:hover { border-color: rgba(232,69,122,0.4); background: rgba(232,69,122,0.05); }
     .avatar-upload-area img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
     }
     .avatar-upload-area svg { width: 24px; height: 24px; color: #555; margin-bottom: 4px; }
     .avatar-upload-area span { font-size: 0.65rem; color: #555; }
-    .avatar-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-
+.avatar-upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  opacity: 0;
+  cursor: pointer;
+}
     /* ─── BUTTONS ─── */
     .btn-primary {
       width: 100%; height: 56px; border-radius: 16px; border: none; cursor: pointer;
@@ -326,7 +327,59 @@ border-radius:  9999px !important;
   font-weight: 900;
   top: -2px;
   right: 3px;
-}   
+}  
+
+.selected-photos-box{
+  margin: 0 0 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.selected-photos-title{
+  font-size: .78rem;
+  color: #888;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.selected-photos-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.selected-photo-card{
+  position:relative;
+  aspect-ratio:1/1;
+  border-radius:12px;
+  overflow:visible;
+  background:#111;
+}
+
+.selected-photo-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:12px;
+}
+
+.remove-selected-photo{
+  position:absolute;
+  top:-8px;
+  left:-8px;
+  width:26px;
+  height:26px;
+  border:none;
+  border-radius:50%;
+  background:linear-gradient(135deg,#e8457a,#a855f7);
+  color:#fff;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  z-index:5;
+}
   </style>
 </head>
 <body>
@@ -537,6 +590,10 @@ border-radius:  9999px !important;
   onchange="previewAvatar(event)"
 />
           </label>
+          <div class="selected-photos-box" id="selectedPhotosBox" style="display:none;">
+  <div class="selected-photos-title">התמונות שבחרת</div>
+  <div class="selected-photos-grid" id="selectedPhotosGrid"></div>
+</div>
 
           <div class="field">
             <label for="goal">מה את/ה מחפש/ת?</label>
@@ -716,30 +773,70 @@ function slideTo(idx) {
   }
 
   /* ─── AVATAR ─── */
-  function previewAvatar(e) {
+ function previewAvatar(e) {
   const files = [...e.target.files];
 
-  if (files.length > 4) {
+  selectedPhotos = [...selectedPhotos, ...files];
+
+  if (selectedPhotos.length > 4) {
     alert("אפשר להעלות עד 4 תמונות");
-    e.target.value = "";
+    selectedPhotos = selectedPhotos.slice(0, 4);
+  }
+
+  renderSelectedPhotos();
+
+  e.target.value = "";
+}
+
+
+function renderSelectedPhotos() {
+  const box = document.getElementById("selectedPhotosBox");
+  const grid = document.getElementById("selectedPhotosGrid");
+
+  grid.innerHTML = "";
+
+  if (!selectedPhotos.length) {
+    box.style.display = "none";
+
+    document.getElementById("avatarPreview").style.display = "none";
+    document.getElementById("avatarIcon").style.display = "block";
+    document.getElementById("avatarLabel").style.display = "block";
     return;
   }
 
-  selectedPhotos = files;
+  box.style.display = "block";
 
-  const firstFile = files[0];
-  if (!firstFile) return;
+  selectedPhotos.forEach((file, index) => {
+    const url = URL.createObjectURL(file);
 
-  const reader = new FileReader();
-  reader.onload = ev => {
-    document.getElementById("avatarPreview").src = ev.target.result;
-    document.getElementById("avatarPreview").style.display = "block";
-    document.getElementById("avatarIcon").style.display = "none";
-    document.getElementById("avatarLabel").style.display = "none";
-  };
+    const card = document.createElement("div");
+    card.className = "selected-photo-card";
 
-  reader.readAsDataURL(firstFile);
+    card.innerHTML = `
+      <button type="button" class="remove-selected-photo" onclick="removeSelectedPhoto(${index})">×</button>
+      <img src="${url}">
+    `;
+
+    grid.appendChild(card);
+
+    if (index === 0) {
+      document.getElementById("avatarPreview").src = url;
+      document.getElementById("avatarPreview").style.display = "block";
+      document.getElementById("avatarIcon").style.display = "none";
+      document.getElementById("avatarLabel").style.display = "none";
+    }
+  });
 }
+
+function removeSelectedPhoto(index) {
+  selectedPhotos.splice(index, 1);
+
+  const input = document.getElementById("avatarFile");
+  input.value = "";
+
+  renderSelectedPhotos();
+}
+
 
   /* ─── INTERESTS ─── */
   function toggleInt(btn) {
