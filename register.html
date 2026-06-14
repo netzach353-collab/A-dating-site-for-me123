@@ -873,7 +873,8 @@ async function handleGoogle() {
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/register.html',
+redirectTo: window.location.origin +
+'/A-dating-site-for-me123/register.html',
       queryParams: {
         prompt: 'select_account'
       }
