@@ -582,8 +582,7 @@ border-radius:  9999px !important;
     <button
       type="button"
       class="btn-google"
-      onclick="document.getElementById('verificationVideoFile').click()"
-    >
+onclick="openVerificationCamera()">
       צלמי וידאו אימות
     </button>
 
@@ -711,6 +710,18 @@ function previewVerificationVideo(event) {
   document.getElementById(
     "verificationVideoErr"
   ).style.display = "none";
+}
+
+function openVerificationCamera() {
+  const isMobile =
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (!isMobile) {
+    alert("את אימות הווידאו יש לבצע דרך הטלפון הנייד");
+    return;
+  }
+
+  document.getElementById("verificationVideoFile").click();
 }
 
   /* ─── NAVIGATION ─── */
