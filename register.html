@@ -111,10 +111,8 @@
 }
 
 .slides-track {
-  display: flex;
+  display: block;
   direction: ltr;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
 }
 
 .slide {
@@ -166,14 +164,7 @@
     .strength-seg.strong { background: #22c55e; }
     .strength-label { font-size: 0.7rem; color: #666; margin-top: 4px; }
 
-    /* SHOW PASSWORD TOGGLE */
-    .toggle-pw {
-      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; color: #555;
-      display: flex; align-items: center;
-    }
-    .toggle-pw svg { width: 17px; height: 17px; }
-
+  
     /* ─── INTERESTS (step 3) ─── */
     .interests-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .int-btn {
@@ -220,14 +211,6 @@
     }
     .btn-back:hover { background: rgba(255,255,255,0.05); color: #ccc; }
 
-    /* ─── DIVIDER ─── */
-    .or-divider {
-      display: flex; align-items: center; gap: 12px; margin: 20px 0;
-    }
-    .or-divider::before, .or-divider::after {
-      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
-    }
-    .or-divider span { font-size: 0.75rem; color: #555; }
 
     /* ─── GOOGLE ─── */
     .btn-google {
@@ -394,6 +377,46 @@ border-radius:  9999px !important;
   cursor:pointer;
   z-index:5;
 }
+
+.slide {
+  min-width: 100%;
+  flex: 0 0 100%;
+  direction: rtl;
+  display: none;
+}
+
+.slide.active {
+  display: block;
+}
+
+.verification-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.verification-text {
+  font-size: 0.85rem;
+  color: #aaa;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.verification-code {
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 10px;
+  color: #e8457a;
+  background: rgba(232,69,122,0.08);
+  border: 1px solid rgba(232,69,122,0.2);
+  border-radius: 14px;
+  padding: 14px 8px;
+  margin-bottom: 16px;
+  direction: ltr;
+}
   </style>
 </head>
 <body>
@@ -431,8 +454,8 @@ border-radius:  9999px !important;
       <div class="slides-track" id="slidesTrack">
 
         <!-- ══════ STEP 1 ══════ -->
-        <div class="slide" id="slide1">
-          <div class="step-header">
+           <div class="slide active" id="slide1">
+              <div class="step-header">
             <div class="step-tag">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
               שלב 1 מתוך 3
@@ -451,53 +474,6 @@ border-radius:  9999px !important;
             </svg>
             המשך עם Google
           </button>
-
-          <div class="or-divider"><span>או עם אימייל</span></div>
-
-          <div class="field">
-            <label for="name">שם מלא</label>
-            <div class="input-wrap">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-              <input type="text" id="name" placeholder="ישראל ישראלי" oninput="clearError('name')" />
-            </div>
-            <div class="field-error" id="nameErr">נא להזין שם מלא</div>
-          </div>
-
-          <div class="field">
-            <label for="email">כתובת אימייל</label>
-            <div class="input-wrap">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              <input type="email" id="email" placeholder="you@example.com" oninput="clearError('email')" />
-            </div>
-            <div class="field-error" id="emailErr">נא להזין כתובת אימייל תקינה</div>
-          </div>
-
-          <div class="field">
-            <label for="password">סיסמה</label>
-            <div class="input-wrap">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-              <input type="password" id="password" placeholder="לפחות 8 תווים" oninput="checkStrength()" />
-              <button class="toggle-pw" type="button" onclick="togglePw('password', this)">
-                <svg id="eyeIcon1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              </button>
-            </div>
-            <div class="strength-bar"><div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div><div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div></div>
-            <div class="strength-label" id="strengthLabel"></div>
-            <div class="field-error" id="pwErr">הסיסמה צריכה להיות לפחות 8 תווים</div>
-          </div>
-
-          <div class="check-row">
-            <input type="checkbox" id="terms" />
-            <label for="terms">אני מסכים/ה ל<a href="#">תנאי השימוש</a> ול<a href="#">מדיניות הפרטיות</a></label>
-          </div>
-          <div class="field-error" id="termsErr" style="display:none; margin-top:6px;">יש לאשר את תנאי השימוש</div>
-
-          <button class="btn-primary" onclick="goStep2()">
-            המשך
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-          </button>
-
-          <p class="login-link">כבר יש לך חשבון? <a href="login.html">התחבר/י</a></p>
         </div>
 
         <!-- ══════ STEP 2 ══════ -->
@@ -511,60 +487,35 @@ border-radius:  9999px !important;
             <p class="step-subtitle">הפרטים האלו יעזרו לנו למצוא עבורך את ההתאמה הטובה ביותר</p>
           </div>
 
-          <div class="field-row">
-            <div class="field">
-              <label for="age">גיל</label>
-              <div class="input-wrap">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <input type="number" id="age" placeholder="25" min="18" max="99" oninput="clearError('age')" />
-              </div>
-              <div class="field-error" id="ageErr">גיל חוקי: 18–99</div>
-            </div>
-            <div class="field">
-              <label for="gender">מגדר</label>
-              <div class="input-wrap">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>
-               <select id="gender" oninput="clearError('gender')">
-  <option value="">בחר/י...</option>
-  <option value="גבר">גבר</option>
-  <option value="אישה">אישה</option>
-  <option value="אחר">אחר / מעדיף/ה לא לציין</option>
-</select>
-              </div>
-              <div class="field-error" id="genderErr">נא לבחור מגדר</div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="city">עיר מגורים</label>
-            <div class="input-wrap">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <input type="text" id="city" placeholder="תל אביב, ירושלים, חיפה..." />
-            </div>
-          </div>
-
-               <div class="field">
-  <label for="phone">מספר טלפון</label>
-  <div class="input-wrap">
-    <input
-      type="tel"
-      id="phone"
-      placeholder="0501234567"
-      oninput="clearError('phone')"
-    />
+         <div class="field-row">
+  <div class="field">
+    <label for="age">גיל</label>
+    <div class="input-wrap">
+      <input
+        type="number"
+        id="age"
+        placeholder="25"
+        min="18"
+        max="99"
+        oninput="clearError('age')"
+      />
+    </div>
+    <div class="field-error" id="ageErr">
+      גיל חוקי: 18–99
+    </div>
   </div>
-  <div class="field-error" id="phoneErr">
-    נא להזין מספר טלפון תקין
+
+  <div class="field">
+    <label>מגדר</label>
+    <div class="input-wrap">
+      <input
+        type="text"
+        value="אישה"
+        readonly
+      />
+    </div>
   </div>
 </div>
-
-          <div class="field">
-            <label for="occupation">מקצוע (לא חובה)</label>
-            <div class="input-wrap">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              <input type="text" id="occupation" placeholder="מפתח/ת, מעצב/ת, רופא/ה..." />
-            </div>
-          </div>
 
           <div class="field">
             <label for="bio">קצת על עצמי (לא חובה)</label>
@@ -616,46 +567,71 @@ border-radius:  9999px !important;
   <div class="selected-photos-grid" id="selectedPhotosGrid"></div>
 </div>
 
-          <div class="field">
-            <label for="goal">מה את/ה מחפש/ת?</label>
-            <div class="input-wrap">
-              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-             <select id="goal">
-  <option value="">בחר/י...</option>
-  <option value="קשר רציני">קשר רציני</option>
-  <option value="הכרות קלילה">הכרות קלילה</option>
-  <option value="חברות">חברות</option>
-  <option value="פתוח/ה להכל">פתוח/ה להכל</option>
-</select>
-            </div>
-          </div>
+         <div class="field">
+  <label>וידאו אימות חובה</label>
 
-          <div class="field">
-            <label>תחומי עניין (בחר/י עד 6)</label>
-            <div class="interests-grid" id="interestsGrid">
-<button type="button" class="int-btn" onclick="toggleInt(this)">ספורט 🏃</button>              <button class="int-btn" onclick="toggleInt(this)">מוזיקה 🎵</button>
-              <button class="int-btn" onclick="toggleInt(this)">טיולים ✈️</button>
-              <button class="int-btn" onclick="toggleInt(this)">בישול 🍳</button>
-              <button class="int-btn" onclick="toggleInt(this)">אמנות 🎨</button>
-              <button class="int-btn" onclick="toggleInt(this)">קריאה 📚</button>
-              <button class="int-btn" onclick="toggleInt(this)">צילום 📷</button>
-              <button class="int-btn" onclick="toggleInt(this)">יוגה 🧘</button>
-              <button class="int-btn" onclick="toggleInt(this)">ריקוד 💃</button>
-              <button class="int-btn" onclick="toggleInt(this)">גיימינג 🎮</button>
-              <button class="int-btn" onclick="toggleInt(this)">קולנוע 🎬</button>
-              <button class="int-btn" onclick="toggleInt(this)">טבע 🌿</button>
-              <button class="int-btn" onclick="toggleInt(this)">ים 🌊</button>
-              <button class="int-btn" onclick="toggleInt(this)">כושר 💪</button>
-              <button class="int-btn" onclick="toggleInt(this)">מדע 🔬</button>
-            </div>
-          </div>
+  <div class="verification-box">
+    <p class="verification-text">
+      צלמי וידאו קצר שבו רואים את פנייך ואמרי בקול את המספר:
+    </p>
+
+    <div class="verification-code" id="verificationCodeText">
+      0000
+    </div>
+
+    <button
+      type="button"
+      class="btn-google"
+      onclick="document.getElementById('verificationVideoFile').click()"
+    >
+      צלמי וידאו אימות
+    </button>
+
+    <input
+      type="file"
+      id="verificationVideoFile"
+      accept="video/*"
+      capture="user"
+      style="display:none"
+      onchange="previewVerificationVideo(event)"
+    />
+
+    <div
+      id="verificationVideoPreviewBox"
+      style="display:none; margin-top:16px;"
+    >
+      <video
+        id="verificationVideoPreview"
+        controls
+        playsinline
+        style="
+          width:100%;
+          max-height:320px;
+          border-radius:14px;
+          background:#000;
+        "
+      ></video>
+
+      <p style="font-size:.75rem; color:#888; margin-top:8px;">
+        הסרטון ישמש לאימות בלבד ולא יוצג בפרופיל.
+      </p>
+    </div>
+
+    <div
+      class="field-error"
+      id="verificationVideoErr"
+      style="display:none; margin-top:8px;"
+    >
+      חובה לצלם וידאו ולקרוא בו את המספר המוצג
+    </div>
+  </div>
+</div>
 
           <button class="btn-primary" onclick="finish()">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             צור/י חשבון
           </button>
-          <button class="btn-back" onclick="goStep2()">← חזרה</button>
-        </div>
+<button class="btn-back" onclick="goStep2Back()">← חזרה</button>        </div>
 
       </div><!-- /slides-track -->
     </div><!-- /slides-outer -->
@@ -690,6 +666,53 @@ let isGoogleSignup = false;
 const R2_UPLOAD_ENDPOINT = "https://product-upload.netzach353.workers.dev";
 let selectedPhotos = [];
 
+let verificationVideo = null;
+
+const verificationCode =
+  String(Math.floor(1000 + Math.random() * 9000));
+  
+  document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("verificationCodeText").textContent =
+    verificationCode;
+});
+
+function previewVerificationVideo(event) {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("video/")) {
+    alert("נא לבחור קובץ וידאו");
+    event.target.value = "";
+    return;
+  }
+
+  const maxSize = 50 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    alert("הווידאו גדול מדי. ניתן להעלות עד 50MB");
+    event.target.value = "";
+    return;
+  }
+
+  verificationVideo = file;
+
+  const videoUrl = URL.createObjectURL(file);
+  const preview = document.getElementById(
+    "verificationVideoPreview"
+  );
+
+  preview.src = videoUrl;
+
+  document.getElementById(
+    "verificationVideoPreviewBox"
+  ).style.display = "block";
+
+  document.getElementById(
+    "verificationVideoErr"
+  ).style.display = "none";
+}
+
   /* ─── NAVIGATION ─── */
   function goStep2() {
     if (!validateStep1()) return;
@@ -707,8 +730,18 @@ let selectedPhotos = [];
   function goStep2Back() { slideTo(1); updateProgress(2); currentStep = 2; }
 
 function slideTo(idx) {
-  document.getElementById('slidesTrack').style.transform = `translateX(-${idx * 100}%)`;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const slides = document.querySelectorAll('.slide');
+
+  slides.forEach((slide, index) => {
+    slide.classList.toggle('active', index === idx);
+  });
+
+  document.getElementById('slidesTrack').style.transform = 'none';
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 
   /* ─── PROGRESS ─── */
@@ -730,23 +763,19 @@ function slideTo(idx) {
 
   /* ─── VALIDATION ─── */
   function validateStep1() {
-    let ok = true;
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const pw = document.getElementById('password').value;
-    const terms = document.getElementById('terms').checked;
-    if (!name) { showError('name', 'nameErr'); ok = false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('email', 'emailErr'); ok = false; }
-    if (pw.length < 8) { showError('password', 'pwErr'); ok = false; }
-    if (!terms) { document.getElementById('termsErr').style.display = 'block'; ok = false; }
-    return ok;
+  const terms = document.getElementById('terms').checked;
+
+  if (!terms) {
+    document.getElementById('termsErr').style.display = 'block';
+    return false;
   }
+
+  return true;
+}
   function validateStep2() {
     let ok = true;
     const age = parseInt(document.getElementById('age').value);
-    const gender = document.getElementById('gender').value;
     if (!age || age < 18 || age > 99) { showError('age', 'ageErr'); ok = false; }
-    if (!gender) { showError('gender', 'genderErr'); ok = false; }
     return ok;
   }
   function showError(fieldId, errId) {
@@ -760,37 +789,6 @@ function slideTo(idx) {
     const errEl = document.getElementById(fieldId + 'Err');
     if (errEl) errEl.style.display = 'none';
     document.getElementById('termsErr').style.display = 'none';
-  }
-
-  /* ─── STRENGTH ─── */
-  function checkStrength() {
-    const pw = document.getElementById('password').value;
-    clearError('password');
-    const segs = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3'), document.getElementById('s4')];
-    const lbl = document.getElementById('strengthLabel');
-    segs.forEach(s => { s.className = 'strength-seg'; });
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    if (pw.length === 0) { lbl.textContent = ''; return; }
-    const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
-    const labels = { weak: 'סיסמה חלשה', medium: 'סיסמה בינונית', strong: 'סיסמה חזקה ✓' };
-    const colors = { weak: '#ef4444', medium: '#f59e0b', strong: '#22c55e' };
-    for (let i = 0; i < score; i++) segs[i].classList.add(cls);
-    lbl.textContent = labels[cls];
-    lbl.style.color = colors[cls];
-  }
-
-  /* ─── SHOW/HIDE PASSWORD ─── */
-  function togglePw(id, btn) {
-    const inp = document.getElementById(id);
-    const isHidden = inp.type === 'password';
-    inp.type = isHidden ? 'text' : 'password';
-    btn.querySelector('svg').innerHTML = isHidden
-      ? '<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>'
-      : '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
   }
 
   /* ─── AVATAR ─── */
@@ -867,7 +865,7 @@ function removeSelectedPhoto(index) {
   }
 
   /* ─── GOOGLE ─── */
-async function handleGoogle() {
+/*async function handleGoogle() {
   sessionStorage.setItem('google_signup_started', '1');
 
   const { error } = await supabaseClient.auth.signInWithOAuth({
@@ -882,8 +880,16 @@ redirectTo: window.location.origin +
   });
 
   if (error) alert(error.message);
-}
+}*/
 
+async function handleGoogle() {
+
+  isGoogleSignup = true;
+
+  slideTo(1);
+  updateProgress(2);
+  currentStep = 2;
+}
 async function uploadPhotosToR2(userId) {
   const uploadedUrls = [];
 
@@ -912,6 +918,14 @@ async function uploadPhotosToR2(userId) {
   /* ─── FINISH ─── */
 async function finish() {
 
+  if (!verificationVideo) {
+  document.getElementById(
+    "verificationVideoErr"
+  ).style.display = "block";
+
+  return;
+}
+
   if (!isGoogleSignup) {
     if (!validateStep1()) {
       goStep1();
@@ -924,50 +938,21 @@ async function finish() {
     return;
   }
 
-  const fullName = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-
   const age = Number(document.getElementById('age').value);
-  const gender = document.getElementById('gender').value;
-  const city = document.getElementById('city').value.trim();
-  const occupation = document.getElementById('occupation').value.trim();
+  const gender = "אישה";
   const bio = document.getElementById('bio').value.trim();
   const goal = document.getElementById('goal').value;
-  const phone = document.getElementById('phone').value.trim();
 
-  const interests = [...document.querySelectorAll('.int-btn.sel')]
-    .map(btn => btn.textContent.trim());
+const { data: { session } } =
+  await supabaseClient.auth.getSession();
 
-  let user;
-
-if (isGoogleSignup) {
-
-  const { data: { session } } =
-    await supabaseClient.auth.getSession();
-
-  user = session.user;
-
-} else {
-
-  const { data, error } =
-    await supabaseClient.auth.signUp({
-      email,
-      password
-    });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  if (!data.session) {
-    alert("צריך לאשר אימייל");
-    return;
-  }
-
-  user = data.session.user;
+if (!session?.user) {
+  alert("יש להתחבר עם Google");
+  return;
 }
+
+const user = session.user;
+
 let photos = [];
 
 try {
@@ -983,8 +968,11 @@ const mainAvatar = photos[0] || null;
     .from("profiles")
    .upsert({
   id: user.id,
-  full_name: fullName,
   email: user.email,
+  full_name:
+  user.user_metadata?.full_name ||
+  user.user_metadata?.name ||
+  '',
   phone,
   age: age || null,
   gender,
@@ -992,17 +980,29 @@ const mainAvatar = photos[0] || null;
   occupation,
   bio,
   goal,
-  interests,
   photos,
 avatar_url: mainAvatar,
   terms_accepted: true,
-  profile_completed: true
+  profile_completed: true,
+  verification_video_url: verificationVideoUrl,
+verification_code: verificationCode,
+verification_status: "pending",
 });
 
   if (profileError) {
     alert("המשתמש נוצר אבל הפרופיל לא נשמר: " + profileError.message);
     return;
   }
+
+  let verificationVideoUrl;
+
+try {
+  verificationVideoUrl =
+    await uploadVerificationVideo(user.id);
+} catch (error) {
+  alert(error.message);
+  return;
+}
 
   window.location.href = "my-profile.html";
 }
@@ -1043,18 +1043,35 @@ window.addEventListener('load', async () => {
 
   isGoogleSignup = true;
 
-  document.getElementById('name').value =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    '';
-
-  document.getElementById('email').value =
-    user.email || '';
 
   slideTo(1);
   updateProgress(2);
   currentStep = 2;
 });
+
+async function uploadVerificationVideo(userId) {
+  const formData = new FormData();
+
+  formData.append("file", verificationVideo);
+  formData.append("userId", userId);
+  formData.append("type", "verification-video");
+  formData.append("verificationCode", verificationCode);
+
+  const response = await fetch(R2_UPLOAD_ENDPOINT, {
+    method: "POST",
+    body: formData
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "שגיאה בהעלאת סרטון האימות"
+    );
+  }
+
+  return result.videoUrl || result.fileUrl || result.imageUrl;
+}
 </script>
 </body>
 </html>
