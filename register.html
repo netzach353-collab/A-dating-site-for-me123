@@ -876,7 +876,7 @@ function removeSelectedPhoto(index) {
   }
 
   /* ─── GOOGLE ─── */
-/*async function handleGoogle() {
+async function handleGoogle() {
   sessionStorage.setItem('google_signup_started', '1');
 
   const { error } = await supabaseClient.auth.signInWithOAuth({
@@ -891,16 +891,8 @@ redirectTo: window.location.origin +
   });
 
   if (error) alert(error.message);
-}*/
-
-async function handleGoogle() {
-
-  isGoogleSignup = true;
-
-  slideTo(1);
-  updateProgress(2);
-  currentStep = 2;
 }
+
 async function uploadPhotosToR2(userId) {
   const uploadedUrls = [];
 
