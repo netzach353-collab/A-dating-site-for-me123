@@ -797,7 +797,7 @@ function validateStep1() {
     if (el) el.classList.add('error');
     document.getElementById(errId).style.display = 'block';
   }
-  
+
 function clearError(fieldId) {
   const el =
     document.getElementById(fieldId);
@@ -1018,8 +1018,7 @@ async function finish() {
       photos: photos,
       avatar_url: mainAvatar,
       terms_accepted: true,
-      profile_completed: true,
-      verification_status: "pending"
+      profile_completed: true
     });
 
   if (profileError) {
