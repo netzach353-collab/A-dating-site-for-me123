@@ -530,7 +530,11 @@ border-radius:  9999px !important;
     border-radius:14px;
     padding:16px;
   ">
-אתר זה נועד לסטוצים ולהכרויות לטווח קצר חובה לאמת פרופיל ולהיות מעל גיל 18 שלב הבא דורש אימות קצר במצלמת הטלפון של דיבור וצילום הפנים לא ניתן לצלם במצלמת המחשב    </span>
+אתר זה מיועד להיכרויות קצרות טווח ולמפגשים מזדמנים. השימוש באתר מותר לבני 18 ומעלה בלבד.
+
+לצורך שמירה על אמינות ובטיחות המשתמשים, נדרש אימות פרופיל קצר באמצעות מצלמת הטלפון. בשלב הבא תתבקשי לצלם סרטון קצר שבו ייראו פנייך ותאמרי בקול את קוד האימות שיוצג על המסך.
+
+מטעמי אבטחה, לא ניתן לבצע את האימות באמצעות מצלמת מחשב. סרטון האימות אינו יוצג למשתמשים אחרים באתר, והוא מיועד לצפייה של צוות ניהול האתר בלבד לצורך אימות החשבון.
 </div>
 
           <button class="btn-primary" onclick="goStep3()">
@@ -784,16 +788,10 @@ function slideTo(idx) {
   }
 
   /* ─── VALIDATION ─── */
-  function validateStep1() {
-  const terms = document.getElementById('terms').checked;
-
-  if (!terms) {
-    document.getElementById('termsErr').style.display = 'block';
-    return false;
-  }
-
+function validateStep1() {
   return true;
 }
+
   function validateStep2() {
     let ok = true;
     const age = parseInt(document.getElementById('age').value);
@@ -887,7 +885,7 @@ function removeSelectedPhoto(index) {
   }
 
   /* ─── GOOGLE ─── */
-async function handleGoogle() {
+/*async function handleGoogle() {
   sessionStorage.setItem('google_signup_started', '1');
 
   const { error } = await supabaseClient.auth.signInWithOAuth({
@@ -902,8 +900,16 @@ redirectTo: window.location.origin +
   });
 
   if (error) alert(error.message);
-}
+}*/
 
+async function handleGoogle() {
+
+  isGoogleSignup = true;
+
+  slideTo(1);
+  updateProgress(2);
+  currentStep = 2;
+}
 async function uploadPhotosToR2(userId) {
   const uploadedUrls = [];
 
@@ -931,20 +937,12 @@ async function uploadPhotosToR2(userId) {
 
   /* ─── FINISH ─── */
 async function finish() {
-
   if (!verificationVideo) {
-  document.getElementById(
-    "verificationVideoErr"
-  ).style.display = "block";
+    document.getElementById(
+      "verificationVideoErr"
+    ).style.display = "block";
 
-  return;
-}
-
-  if (!isGoogleSignup) {
-    if (!validateStep1()) {
-      goStep1();
-      return;
-    }
+    return;
   }
 
   if (!validateStep2()) {
@@ -952,71 +950,113 @@ async function finish() {
     return;
   }
 
-  const age = Number(document.getElementById('age').value);
+  const age = Number(
+    document.getElementById("age").value
+  );
+
   const gender = "אישה";
-  const bio = document.getElementById('bio').value.trim();
-  const goal = document.getElementById('goal').value;
 
-const { data: { session } } =
-  await supabaseClient.auth.getSession();
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabaseClient.auth.getSession();
 
-if (!session?.user) {
-  alert("יש להתחבר עם Google");
-  return;
-}
-
-const user = session.user;
-
-let photos = [];
-
-try {
-  photos = await uploadPhotosToR2(user.id);
-} catch (err) {
-  alert(err.message);
-  return;
-}
-
-const mainAvatar = photos[0] || null;
-
-  const { error: profileError } = await supabaseClient
-    .from("profiles")
-   .upsert({
-  id: user.id,
-  email: user.email,
-  full_name:
-  user.user_metadata?.full_name ||
-  user.user_metadata?.name ||
-  '',
-  phone,
-  age: age || null,
-  gender,
-  city,
-  occupation,
-  bio,
-  goal,
-  photos,
-avatar_url: mainAvatar,
-  terms_accepted: true,
-  profile_completed: true,
-  verification_video_url: verificationVideoUrl,
-verification_code: verificationCode,
-verification_status: "pending",
-});
-
-  if (profileError) {
-    alert("המשתמש נוצר אבל הפרופיל לא נשמר: " + profileError.message);
+  if (sessionError) {
+    alert(
+      "שגיאה בבדיקת ההתחברות: " +
+      sessionError.message
+    );
     return;
   }
 
+  if (!session?.user) {
+    alert("יש להתחבר עם Google לפני יצירת הפרופיל");
+    return;
+  }
+
+  const user = session.user;
+
+  let photos = [];
+
+  try {
+    photos = await uploadPhotosToR2(user.id);
+  } catch (error) {
+    alert(
+      "שגיאה בהעלאת התמונות: " +
+      error.message
+    );
+    return;
+  }
+
+  const mainAvatar = photos[0] || null;
+
   let verificationVideoUrl;
 
-try {
-  verificationVideoUrl =
-    await uploadVerificationVideo(user.id);
-} catch (error) {
-  alert(error.message);
-  return;
-}
+  try {
+    verificationVideoUrl =
+      await uploadVerificationVideo(user.id);
+  } catch (error) {
+    alert(
+      "שגיאה בהעלאת סרטון האימות: " +
+      error.message
+    );
+    return;
+  }
+
+  const {
+    error: profileError
+  } = await supabaseClient
+    .from("profiles")
+    .upsert({
+      id: user.id,
+      email: user.email,
+
+      full_name:
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        "",
+
+      age: age,
+      gender: gender,
+      photos: photos,
+      avatar_url: mainAvatar,
+      terms_accepted: true,
+      profile_completed: true,
+      verification_status: "pending"
+    });
+
+  if (profileError) {
+    alert(
+      "הפרופיל לא נשמר: " +
+      profileError.message
+    );
+    return;
+  }
+
+  const {
+    error: verificationError
+  } = await supabaseClient
+    .from("verification_requests")
+    .upsert(
+      {
+        user_id: user.id,
+        verification_code: verificationCode,
+        video_url: verificationVideoUrl,
+        status: "pending",
+        submitted_at: new Date().toISOString()
+      },
+      {
+        onConflict: "user_id"
+      }
+    );
+
+  if (verificationError) {
+    alert(
+      "הפרופיל נשמר, אבל נתוני האימות לא נשמרו: " +
+      verificationError.message
+    );
+    return;
+  }
 
   window.location.href = "my-profile.html";
 }
