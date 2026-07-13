@@ -728,15 +728,9 @@ function previewVerificationVideo(event) {
 }
 
 function openVerificationCamera() {
-  const isMobile =
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (!isMobile) {
-    alert("את אימות הווידאו יש לבצע דרך הטלפון הנייד");
-    return;
-  }
-
-  document.getElementById("verificationVideoFile").click();
+  document
+    .getElementById("verificationVideoFile")
+    .click();
 }
 
   /* ─── NAVIGATION ─── */
@@ -803,13 +797,24 @@ function validateStep1() {
     if (el) el.classList.add('error');
     document.getElementById(errId).style.display = 'block';
   }
-  function clearError(fieldId) {
-    const el = document.getElementById(fieldId);
-    if (el) el.classList.remove('error');
-    const errEl = document.getElementById(fieldId + 'Err');
-    if (errEl) errEl.style.display = 'none';
-    document.getElementById('termsErr').style.display = 'none';
+  
+function clearError(fieldId) {
+  const el =
+    document.getElementById(fieldId);
+
+  if (el) {
+    el.classList.remove("error");
   }
+
+  const errEl =
+    document.getElementById(
+      fieldId + "Err"
+    );
+
+  if (errEl) {
+    errEl.style.display = "none";
+  }
+}
 
   /* ─── AVATAR ─── */
  function previewAvatar(e) {
