@@ -889,33 +889,185 @@ function removeSelectedPhoto(index) {
     btn.classList.toggle('sel');
   }
 
-  /* ─── GOOGLE ─── */
-async function handleGoogle() {
-  sessionStorage.setItem(
-    "google_signup_started",
-    "1"
-  );
 
-  const redirectUrl = new URL(
-    "register.html",
-    window.location.href
-  ).href;
+ async function handleGoogle() {
+  try {
+    const redirectUrl =
+      window.location.origin +
+      window.location.pathname;
 
-  const { error } =
-    await supabaseClient.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-        queryParams: {
-          prompt: "select_account"
+    console.log("GOOGLE REDIRECT URL:", redirectUrl);
+
+    const { error } =
+      await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            prompt: "select_account"
+          }
         }
-      }
-    });
+      });
 
-  if (error) {
-    alert(error.message);
+    if (error) {
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "שגיאה בהתחברות עם Google: " +
+        error.message
+      );
+    }
+  } catch (error) {
+    console.error(
+      "GOOGLE FUNCTION ERROR:",
+      error
+    );
+
+    alert(
+      "שגיאה בהפעלת Google: " +
+      error.message
+    );
   }
 }
+let authHandled = false;
+
+async function handleReturnedGoogleUser() {
+  if (authHandled) return;
+
+  authHandled = true;
+
+  try {
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabaseClient.auth.getSession();
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    /*
+    אין משתמש מחובר.
+    נשארים בשלב הראשון.
+    */
+    if (!session?.user) {
+      authHandled = false;
+      return;
+    }
+
+    const user = session.user;
+
+    console.log(
+      "CONNECTED GOOGLE USER:",
+      user.email,
+      user.id
+    );
+
+    const {
+      data: profile,
+      error: profileError
+    } = await supabaseClient
+      .from("profiles")
+      .select(`
+        id,
+        profile_completed,
+        photos,
+        verification_code,
+        verification_video_url
+      `)
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error(
+        "PROFILE CHECK ERROR:",
+        profileError
+      );
+
+      /*
+      לא עושים redirect כאשר בדיקת הפרופיל נכשלה.
+      אחרת עלול להיווצר לופ.
+      */
+      authHandled = false;
+      return;
+    }
+
+    const hasPhotos =
+      Array.isArray(profile?.photos) &&
+      profile.photos.length > 0;
+
+    const hasVerificationCode =
+      typeof profile?.verification_code === "string" &&
+      profile.verification_code.trim() !== "";
+
+    const hasVerificationVideo =
+      typeof profile?.verification_video_url === "string" &&
+      profile.verification_video_url.trim() !== "";
+
+    const profileIsComplete =
+      profile?.profile_completed === true &&
+      hasPhotos &&
+      hasVerificationCode &&
+      hasVerificationVideo;
+
+    /*
+    חשבון קיים שסיים הרשמה.
+    */
+    if (profileIsComplete) {
+      window.location.replace(
+        new URL(
+          "index.html",
+          window.location.href
+        ).href
+      );
+
+      return;
+    }
+
+    /*
+    חשבון חדש או חשבון קיים שלא סיים הרשמה.
+    ממשיכים לשלב 2.
+    */
+    isGoogleSignup = true;
+    currentStep = 2;
+
+    slideTo(1);
+    updateProgress(2);
+
+    /*
+    מנקים רק את פרמטרי OAuth.
+    אין כאן reload.
+    */
+    const cleanUrl =
+      window.location.origin +
+      window.location.pathname;
+
+    window.history.replaceState(
+      {},
+      document.title,
+      cleanUrl
+    );
+
+  } catch (error) {
+    console.error(
+      "AUTH RETURN ERROR:",
+      error
+    );
+
+    authHandled = false;
+  }
+}
+
+window.addEventListener(
+  "DOMContentLoaded",
+  handleReturnedGoogleUser
+);
+
+
+
 async function uploadPhotosToR2(userId) {
   const uploadedUrls = [];
 
@@ -1057,8 +1209,12 @@ async function uploadPhotosToR2(userId) {
     return;
   }
 
-  window.location.href =
-    "my-profile.html";
+window.location.replace(
+  new URL(
+    "my-profile.html",
+    window.location.href
+  ).href
+);
 }
 
   function showSuccess() {
@@ -1067,103 +1223,7 @@ async function uploadPhotosToR2(userId) {
     document.getElementById('successScreen').classList.add('show');
   }
 
-let registerPageInitialized = false;
 
-window.addEventListener("load", async () => {
-  if (registerPageInitialized) return;
-
-  registerPageInitialized = true;
-
-  try {
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabaseClient.auth.getSession();
-
-    if (sessionError) {
-      console.error(
-        "SESSION ERROR:",
-        sessionError
-      );
-      return;
-    }
-
-    /*
-    המשתמשת עדיין לא התחברה:
-    נשארים בשלב ההתחברות.
-    */
-    if (!session?.user) {
-      return;
-    }
-
-    const user = session.user;
-
-    /*
-    מנקים את קוד ההתחברות מהכתובת
-    בלי לטעון את הדף מחדש.
-    */
-    if (
-      window.location.hash ||
-      window.location.search.includes("code=")
-    ) {
-      history.replaceState(
-        null,
-        "",
-        window.location.pathname
-      );
-    }
-
-    const {
-      data: profile,
-      error: profileError
-    } = await supabaseClient
-      .from("profiles")
-      .select(`
-        id,
-        profile_completed,
-        verification_code,
-        verification_video_url,
-        photos
-      `)
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profileError) {
-      console.error(
-        "PROFILE CHECK ERROR:",
-        profileError
-      );
-    }
-
-    /*
-    רק פרופיל שבאמת הסתיים עובר לדף הפרופיל.
-    */
-    if (profile?.profile_completed === true) {
-      window.location.replace(
-        "my-profile.html"
-      );
-      return;
-    }
-
-    /*
-    החשבון אושר, אבל ההרשמה לא הסתיימה.
-    עוברים לשלב מילוי הפרטים.
-    */
-    isGoogleSignup = true;
-
-    slideTo(1);
-    updateProgress(2);
-    currentStep = 2;
-
-  } catch (error) {
-    console.error(
-      "REGISTER INITIALIZATION ERROR:",
-      error
-    );
-
-    registerPageInitialized = false;
-  }
-});
 
 async function uploadVerificationVideo(userId) {
   const formData = new FormData();
