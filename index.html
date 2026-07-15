@@ -311,7 +311,7 @@ width: 80% !important;
     <p style="color:#888;font-size:.9rem;margin-bottom:20px;">האם אתה בטוח שברצונך לצאת מהחשבון?</p>
 
     <button onclick="logoutUser()" style="width:100%;height:46px;border:none;border-radius:14px;background:#ef4444;color:white;font-family:Heebo;font-weight:700;cursor:pointer;">
-      כן, להתנתק
+      כן, להתנתק 
     </button>
 
     <button onclick="closeLogoutBanner()" style="width:100%;height:42px;margin-top:10px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:transparent;color:#aaa;font-family:Heebo;cursor:pointer;">
@@ -512,9 +512,46 @@ function renderLoggedInSidebar(profile, user) {
 
 function renderGuestSidebar() {
   document.getElementById("sidebarUserArea").innerHTML = `
-    <a href="register.html" class="w-for-btn1" style="display:flex;align-items:center;gap:6px;padding:2px 14px;border-radius:999px;background:linear-gradient(to left,#e8457a,#a855f7);color:#fff;font-family:'Heebo',sans-serif;font-size:0.8rem;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(232,69,122,0.35);transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-        <svg font-size: 10px !important; width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-      <div class="top-user-name">כניסה / הרשמה</div>
+    <a
+      href="auth-choice.html"
+      class="w-for-btn1"
+      style="
+        display:flex;
+        align-items:center;
+        gap:6px;
+        padding:2px 14px;
+        border-radius:999px;
+        background:linear-gradient(to left,#e8457a,#a855f7);
+        color:#fff;
+        font-family:'Heebo',sans-serif;
+        font-size:0.8rem;
+        font-weight:700;
+        text-decoration:none;
+        white-space:nowrap;
+        box-shadow:0 4px 14px rgba(232,69,122,0.35);
+        transition:opacity .2s;
+      "
+      onmouseover="this.style.opacity='.85'"
+      onmouseout="this.style.opacity='1'"
+    >
+      <svg
+        width="30"
+        height="30"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+        />
+      </svg>
+
+      <div class="top-user-name">
+        כניסה / הרשמה
+      </div>
     </a>
   `;
 }
